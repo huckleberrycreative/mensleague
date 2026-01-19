@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import Layout from '@/components/layout/Layout';
+import { Layout } from '@/components/layout/Layout';
 
 export default function DynamicPage() {
   const { slug } = useParams<{ slug: string }>();
