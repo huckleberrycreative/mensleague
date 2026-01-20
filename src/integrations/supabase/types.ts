@@ -142,6 +142,7 @@ export type Database = {
           salary_2026: string | null
           salary_2027: string | null
           salary_2028: string | null
+          salary_2029: string | null
           team_id: string | null
           updated_at: string
         }
@@ -158,6 +159,7 @@ export type Database = {
           salary_2026?: string | null
           salary_2027?: string | null
           salary_2028?: string | null
+          salary_2029?: string | null
           team_id?: string | null
           updated_at?: string
         }
@@ -174,6 +176,7 @@ export type Database = {
           salary_2026?: string | null
           salary_2027?: string | null
           salary_2028?: string | null
+          salary_2029?: string | null
           team_id?: string | null
           updated_at?: string
         }
