@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,19 +13,38 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [success, setSuccess] = useState('');
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
-      await signIn(email, password);
-      navigate('/admin/dashboard');
+      if (isSignUp) {
+        // Sign up new user
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin,
+          },
+        });
+
+        if (signUpError) throw signUpError;
+        
+        setSuccess('Account created! You can now sign in. Note: An admin will need to grant you admin access.');
+        setIsSignUp(false);
+      } else {
+        await signIn(email, password);
+        navigate('/admin/dashboard');
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
+      setError(err.message || 'Failed to ' + (isSignUp ? 'sign up' : 'sign in'));
     } finally {
       setLoading(false);
     }
@@ -34,9 +54,14 @@ export default function Login() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            {isSignUp ? 'Create Admin Account' : 'Admin Login'}
+          </CardTitle>
           <CardDescription>
-            Enter your credentials to access the Gridiron Guild admin panel
+            {isSignUp 
+              ? 'Create your account to access the Gridiron Guild admin panel'
+              : 'Enter your credentials to access the Gridiron Guild admin panel'
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -44,6 +69,11 @@ export default function Login() {
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {success && (
+              <Alert>
+                <AlertDescription>{success}</AlertDescription>
               </Alert>
             )}
             <div className="space-y-2">
@@ -67,11 +97,25 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
+                minLength={6}
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? (isSignUp ? 'Creating account...' : 'Signing in...') : (isSignUp ? 'Create Account' : 'Sign In')}
             </Button>
+            <div className="text-center text-sm">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError('');
+                  setSuccess('');
+                }}
+                className="text-blue-600 hover:underline"
+              >
+                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+              </button>
+            </div>
           </form>
         </CardContent>
       </Card>
