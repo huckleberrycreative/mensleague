@@ -35,7 +35,7 @@ import AdminPlayoffs from "./pages/admin/Playoffs";
 import AdminPlayerSalaries from "./pages/admin/PlayerSalaries";
 import AdminWeeklyRecaps from "./pages/admin/WeeklyRecaps";
 import AdminMedia from "./pages/admin/Media";
-import AdminPages from "./pages/admin/Pages";
+import AdminPageContent from "./pages/admin/PageContent";
 import AdminPantheon from "./pages/admin/PantheonAdmin";
 import DynamicPage from "./pages/DynamicPage";
 
@@ -89,7 +89,7 @@ const App = () => (
               <Route path="salaries" element={<AdminPlayerSalaries />} />
               <Route path="weekly-recaps" element={<AdminWeeklyRecaps />} />
               <Route path="media" element={<AdminMedia />} />
-              <Route path="pages" element={<AdminPages />} />
+              <Route path="page-content" element={<AdminPageContent />} />
               <Route path="pantheon" element={<AdminPantheon />} />
             </Route>
 
