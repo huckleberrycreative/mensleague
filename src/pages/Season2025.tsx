@@ -22,10 +22,19 @@ const Season2025 = () => {
   const playoffBracket = useMemo(() => {
     if (playoffs.length === 0) return null;
 
-    const champion = playoffs.find(p => p.rank === 1);
-    const runnerUp = playoffs.find(p => p.isFinalist && p.rank !== 1);
-    const thirdPlace = playoffs.find(p => !p.isFinalist && p.finalsScore);
-    const fourthPlace = playoffs.find(p => !p.isFinalist && !p.finalsScore && p.rank <= 4);
+    // Finalists are those who made the championship game
+    const finalists = playoffs.filter(p => p.isFinalist);
+    // Champion is the finalist with the higher finals score
+    const sortedFinalists = [...finalists].sort((a, b) => (b.finalsScore || 0) - (a.finalsScore || 0));
+    const champion = sortedFinalists[0];
+    const runnerUp = sortedFinalists[1];
+    
+    // 3rd place match: non-finalists who have a finals score (played in consolation)
+    const thirdPlaceMatch = playoffs.filter(p => !p.isFinalist && p.finalsScore);
+    const sortedThirdPlace = [...thirdPlaceMatch].sort((a, b) => (b.finalsScore || 0) - (a.finalsScore || 0));
+    const thirdPlace = sortedThirdPlace[0];
+    const fourthPlace = sortedThirdPlace[1];
+    
     const fifthSeed = playoffs.find(p => p.rank === 5);
 
     return { champion, runnerUp, thirdPlace, fourthPlace, fifthSeed };
