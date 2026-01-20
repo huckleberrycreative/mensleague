@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,9 +15,15 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [success, setSuccess] = useState('');
-  const { signIn } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // If the user is already authenticated, don't let them get stuck on /admin/login
+    if (!authLoading && user) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [authLoading, user, navigate]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -41,7 +47,7 @@ export default function Login() {
         setIsSignUp(false);
       } else {
         await signIn(email, password);
-        navigate('/admin/dashboard');
+        // Redirect happens via the useEffect once auth state is updated.
       }
     } catch (err: any) {
       setError(err.message || 'Failed to ' + (isSignUp ? 'sign up' : 'sign in'));
