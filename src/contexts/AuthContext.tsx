@@ -21,102 +21,100 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(
-  ({ children }, ref) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [session, setSession] = useState<Session | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [isAdmin, setIsAdmin] = useState(false);
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
 
-    const checkAdminRole = async (userId: string) => {
-      try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .eq('role', 'admin')
-          .maybeSingle();
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-        if (error) {
-          console.error('Error checking admin role:', error);
-          return false;
-        }
+  const checkAdminRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
 
-        return !!data;
-      } catch (error) {
+      if (error) {
         console.error('Error checking admin role:', error);
         return false;
       }
-    };
 
-    useEffect(() => {
-      // Set up auth state listener FIRST
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      return !!data;
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      return false;
+    }
+  };
 
-        if (session?.user) {
-          // Check admin role from database
-          const hasAdminRole = await checkAdminRole(session.user.id);
-          setIsAdmin(hasAdminRole);
-        } else {
-          setIsAdmin(false);
-        }
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
 
-        setLoading(false);
-      });
+      if (session?.user) {
+        // Check admin role from database
+        const hasAdminRole = await checkAdminRole(session.user.id);
+        setIsAdmin(hasAdminRole);
+      } else {
+        setIsAdmin(false);
+      }
 
-      // THEN get initial session
-      supabase.auth.getSession().then(async ({ data: { session } }) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-        if (session?.user) {
-          const hasAdminRole = await checkAdminRole(session.user.id);
-          setIsAdmin(hasAdminRole);
-        } else {
-          setIsAdmin(false);
-        }
+    // THEN get initial session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
 
-        setLoading(false);
-      });
+      if (session?.user) {
+        const hasAdminRole = await checkAdminRole(session.user.id);
+        setIsAdmin(hasAdminRole);
+      } else {
+        setIsAdmin(false);
+      }
 
-      return () => subscription.unsubscribe();
-    }, []);
+      setLoading(false);
+    });
 
-    const signIn = async (email: string, password: string) => {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    return () => subscription.unsubscribe();
+  }, []);
 
-      if (error) throw error;
-    };
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    const signOut = async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    };
+    if (error) throw error;
+  };
 
-    const value = {
-      user,
-      session,
-      loading,
-      signIn,
-      signOut,
-      isAdmin,
-    };
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  };
 
-    return (
-      <AuthContext.Provider value={value}>
-        <div ref={ref} className="contents">
-          {children}
-        </div>
-      </AuthContext.Provider>
-    );
-  }
-);
-AuthProvider.displayName = 'AuthProvider';
+  const value = {
+    user,
+    session,
+    loading,
+    signIn,
+    signOut,
+    isAdmin,
+  };
 
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
