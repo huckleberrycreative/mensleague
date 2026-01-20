@@ -33,7 +33,7 @@ export default function AdminLayout() {
     { icon: Trophy, label: 'Playoffs', path: '/admin/playoffs' },
     { icon: DollarSign, label: 'Salaries', path: '/admin/salaries' },
     { icon: FileText, label: 'Weekly Recaps', path: '/admin/weekly-recaps' },
-    { icon: FileEdit, label: 'Pages', path: '/admin/pages' },
+    { icon: FileEdit, label: 'Page Content', path: '/admin/page-content' },
     { icon: Image, label: 'Media', path: '/admin/media' },
     { icon: Medal, label: 'Pantheon', path: '/admin/pantheon' },
   ];
