@@ -2,9 +2,16 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout/Layout';
 import { SortableTable, Column } from '@/components/SortableTable';
-import { usePlayerSalaries, PlayerSalaryWithDetails } from '@/hooks/usePlayerSalaries';
+import { usePlayerSalaries, useTeams, PlayerSalaryWithDetails } from '@/hooks/usePlayerSalaries';
 import { cn } from '@/lib/utils';
-import { Star, Loader2 } from 'lucide-react';
+import { Star, Loader2, ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 const positionColors: Record<string, string> = {
   QB: 'bg-red-100 text-red-700 border-red-200',
@@ -17,13 +24,18 @@ const positionColors: Record<string, string> = {
 
 const Salaries = () => {
   const [positionFilter, setPositionFilter] = useState<string>('ALL');
+  const [teamFilter, setTeamFilter] = useState<string>('ALL');
   const { data: players = [], isLoading, error } = usePlayerSalaries();
+  const { data: teams = [] } = useTeams();
 
   const positions = ['ALL', 'QB', 'RB', 'WR', 'TE'];
 
-  const filteredPlayers = positionFilter === 'ALL'
-    ? players
-    : players.filter((p) => p.position === positionFilter);
+  const filteredPlayers = players.filter((p) => {
+    const posMatch = positionFilter === 'ALL' || p.position === positionFilter;
+    const teamMatch = teamFilter === 'ALL' || 
+      (teamFilter === 'FREE_AGENT' ? p.teamId === null : p.teamId === teamFilter);
+    return posMatch && teamMatch;
+  });
 
   const columns: Column<PlayerSalaryWithDetails>[] = [
     {
@@ -84,23 +96,12 @@ const Salaries = () => {
       ),
     },
     {
-      key: 'salary2025',
-      label: '2025',
-      sortable: true,
-      align: 'right',
-      render: (value, row) => (
-        <span className={cn('font-mono', row.franchiseTag && 'text-gold font-semibold')}>
-          {value ? `$${value}` : '-'}
-        </span>
-      ),
-    },
-    {
       key: 'salary2026',
       label: '2026',
       sortable: true,
       align: 'right',
-      render: (value) => (
-        <span className="font-mono">
+      render: (value, row) => (
+        <span className={cn('font-mono', row.franchiseTag && 'text-gold font-semibold')}>
           {value ? `$${value}` : '-'}
         </span>
       ),
@@ -119,6 +120,17 @@ const Salaries = () => {
     {
       key: 'salary2028',
       label: '2028',
+      sortable: true,
+      align: 'right',
+      render: (value) => (
+        <span className="font-mono">
+          {value ? `$${value}` : '-'}
+        </span>
+      ),
+    },
+    {
+      key: 'salary2029',
+      label: '2029',
       sortable: true,
       align: 'right',
       render: (value) => (
@@ -149,6 +161,12 @@ const Salaries = () => {
     );
   }
 
+  const getTeamLabel = () => {
+    if (teamFilter === 'ALL') return 'All Teams';
+    if (teamFilter === 'FREE_AGENT') return 'Free Agents';
+    return teams.find(t => t.id === teamFilter)?.name || 'All Teams';
+  };
+
   return (
     <Layout>
       <section className="py-12 md:py-16">
@@ -170,7 +188,7 @@ const Salaries = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-6"
+            className="mb-4"
           >
             <div className="flex flex-wrap gap-2">
               {positions.map((pos) => (
@@ -188,6 +206,46 @@ const Salaries = () => {
                 </button>
               ))}
             </div>
+          </motion.div>
+
+          {/* Team Filter Dropdown */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.12 }}
+            className="mb-6"
+          >
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto min-w-[200px] justify-between">
+                  {getTeamLabel()}
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-[280px] bg-popover z-50" align="start">
+                <DropdownMenuItem 
+                  onClick={() => setTeamFilter('ALL')}
+                  className={cn(teamFilter === 'ALL' && 'bg-accent')}
+                >
+                  All Teams
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setTeamFilter('FREE_AGENT')}
+                  className={cn(teamFilter === 'FREE_AGENT' && 'bg-accent')}
+                >
+                  Free Agents
+                </DropdownMenuItem>
+                {teams.map((team) => (
+                  <DropdownMenuItem
+                    key={team.id}
+                    onClick={() => setTeamFilter(team.id)}
+                    className={cn(teamFilter === team.id && 'bg-accent')}
+                  >
+                    {team.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </motion.div>
 
           {/* Franchise Tag Legend */}
@@ -220,7 +278,7 @@ const Salaries = () => {
             ) : (
               <div className="text-center py-12 bg-card rounded-lg border border-border">
                 <p className="text-muted-foreground">
-                  No players found. Add players via the admin dashboard.
+                  No players found matching the selected filters.
                 </p>
               </div>
             )}
