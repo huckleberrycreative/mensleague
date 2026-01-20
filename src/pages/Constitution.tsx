@@ -257,16 +257,25 @@ const Constitution = () => {
                           {/* Article content */}
                           <div className="space-y-6">
                             {amendment.content.map((paragraph, pIndex) => {
-                              // Bold "Section X." at the start of paragraphs
-                              const sectionMatch = paragraph.match(/^(Section \d+\.)/);
-                              if (sectionMatch) {
+                              // Get article number from title (e.g., "Article V" -> 5)
+                              const articleMatch = amendment.title.match(/Article ([IVX]+)/);
+                              const romanToArabic: Record<string, number> = {
+                                'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5,
+                                'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10
+                              };
+                              const articleNum = articleMatch ? romanToArabic[articleMatch[1]] : null;
+                              
+                              // Bold "Section X." and convert to "Section {article}.{section}"
+                              const sectionMatch = paragraph.match(/^Section (\d+)\./);
+                              if (sectionMatch && articleNum) {
+                                const sectionNum = sectionMatch[1];
                                 return (
                                   <p
                                     key={pIndex}
                                     className="font-oldEnglish text-lg md:text-xl text-black leading-loose text-justify"
                                   >
-                                    <span className="font-bold">{sectionMatch[1]}</span>
-                                    {paragraph.slice(sectionMatch[1].length)}
+                                    <span className="font-bold">Section {articleNum}.{sectionNum}.</span>
+                                    {paragraph.slice(sectionMatch[0].length)}
                                   </p>
                                 );
                               }
