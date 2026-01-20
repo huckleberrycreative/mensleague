@@ -55,52 +55,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     let cancelled = false;
 
+    const applySession = (nextSession: Session | null) => {
+      if (cancelled) return;
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+      setLoading(false);
+
+      if (nextSession?.user) {
+        // Don't block routing/UI on role lookup
+        checkAdminRole(nextSession.user.id)
+          .then((hasAdminRole) => {
+            if (!cancelled) setIsAdmin(hasAdminRole);
+          })
+          .catch((error) => {
+            console.error('Error checking admin role:', error);
+            if (!cancelled) setIsAdmin(false);
+          });
+      } else {
+        setIsAdmin(false);
+      }
+    };
+
     // Set up auth state listener FIRST
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      try {
-        if (cancelled) return;
-
-        setSession(session);
-        setUser(session?.user ?? null);
-
-        if (session?.user) {
-          const hasAdminRole = await checkAdminRole(session.user.id);
-          if (!cancelled) setIsAdmin(hasAdminRole);
-        } else {
-          setIsAdmin(false);
-        }
-      } catch (error) {
-        console.error('Auth state change error:', error);
-        if (!cancelled) setIsAdmin(false);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      applySession(nextSession);
     });
 
     // THEN get initial session
     supabase.auth
       .getSession()
-      .then(async ({ data: { session } }) => {
-        try {
-          if (cancelled) return;
-
-          setSession(session);
-          setUser(session?.user ?? null);
-
-          if (session?.user) {
-            const hasAdminRole = await checkAdminRole(session.user.id);
-            if (!cancelled) setIsAdmin(hasAdminRole);
-          } else {
-            setIsAdmin(false);
-          }
-        } catch (error) {
-          console.error('Initial session fetch error:', error);
-          if (!cancelled) setIsAdmin(false);
-        } finally {
-          if (!cancelled) setLoading(false);
-        }
+      .then(({ data: { session: initialSession } }) => {
+        applySession(initialSession);
       })
       .catch((error) => {
         console.error('getSession() failed:', error);
@@ -118,17 +106,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, []);
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) throw error;
+
+    // Ensure context updates immediately so the UI can redirect without waiting
+    // for onAuthStateChange/getSession timing.
+    setSession(data.session ?? null);
+    setUser(data.user ?? null);
+
+    if (data.user) {
+      // Don't block sign-in on role lookup
+      checkAdminRole(data.user.id)
+        .then((hasAdminRole) => setIsAdmin(hasAdminRole))
+        .catch(() => setIsAdmin(false));
+    } else {
+      setIsAdmin(false);
+    }
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+
+    setSession(null);
+    setUser(null);
+    setIsAdmin(false);
   };
 
   const value = {
