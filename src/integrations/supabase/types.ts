@@ -630,23 +630,38 @@ export type Database = {
       teams: {
         Row: {
           created_at: string
+          governor_response: string | null
+          highest_high: string | null
           id: string
+          lowest_low: string | null
           name: string
           owner_name: string | null
+          profile_image_url: string | null
+          shield_bio: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
+          governor_response?: string | null
+          highest_high?: string | null
           id?: string
+          lowest_low?: string | null
           name: string
           owner_name?: string | null
+          profile_image_url?: string | null
+          shield_bio?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
+          governor_response?: string | null
+          highest_high?: string | null
           id?: string
+          lowest_low?: string | null
           name?: string
           owner_name?: string | null
+          profile_image_url?: string | null
+          shield_bio?: string | null
           updated_at?: string
         }
         Relationships: []

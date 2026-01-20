@@ -4,7 +4,7 @@ import { Layout } from '@/components/layout/Layout';
 import { useGovernorStats, GovernorStats } from '@/hooks/useGovernorStats';
 import { User, Trophy, TrendingUp, TrendingDown, Calendar, Loader2 } from 'lucide-react';
 
-// Generate dynamic bio content based on stats
+// Generate dynamic bio content based on stats (fallback when no custom content)
 const generateShieldBio = (governor: GovernorStats) => {
   const championshipText = governor.championships > 0 
     ? `a ${governor.championships}-time champion known for clutch playoff performances`
@@ -49,6 +49,11 @@ const getOrdinalSuffix = (n: number) => {
   const s = ['th', 'st', 'nd', 'rd'];
   const v = n % 100;
   return s[(v - 20) % 10] || s[v] || s[0];
+};
+
+// Helper to get content with fallback
+const getContent = (customValue: string | null | undefined, fallbackFn: () => string): string => {
+  return customValue?.trim() || fallbackFn();
 };
 
 const MeetTheLeague = () => {
@@ -126,14 +131,27 @@ const MeetTheLeague = () => {
                     <button
                       key={governor.id}
                       onClick={() => setSelectedGovernor(governor)}
-                      className={`w-full text-left px-4 py-3 transition-colors hover:bg-accent/10 ${
+                      className={`w-full text-left px-4 py-3 transition-colors hover:bg-accent/10 flex items-center gap-3 ${
                         currentGovernor.id === governor.id
                           ? 'bg-accent/20 border-l-4 border-accent'
                           : ''
                       }`}
                     >
-                      <span className="font-semibold block">{governor.name}</span>
-                      <span className="text-sm text-muted-foreground">{governor.teamName}</span>
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {governor.profileImageUrl ? (
+                          <img 
+                            src={governor.profileImageUrl} 
+                            alt={governor.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User size={14} className="text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-semibold block truncate">{governor.name}</span>
+                        <span className="text-sm text-muted-foreground truncate block">{governor.teamName}</span>
+                      </div>
                     </button>
                   ))}
                 </nav>
@@ -154,9 +172,17 @@ const MeetTheLeague = () => {
                   {/* Header */}
                   <div className="bg-gradient-to-r from-primary/20 to-accent/20 p-6 md:p-8">
                     <div className="flex flex-col md:flex-row items-start gap-6">
-                      {/* Avatar Placeholder */}
-                      <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center border-4 border-background shadow-lg">
-                        <User size={48} className="text-muted-foreground" />
+                      {/* Avatar */}
+                      <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center border-4 border-background shadow-lg overflow-hidden">
+                        {currentGovernor.profileImageUrl ? (
+                          <img 
+                            src={currentGovernor.profileImageUrl} 
+                            alt={currentGovernor.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User size={48} className="text-muted-foreground" />
+                        )}
                       </div>
                       <div className="flex-1">
                         <h2 className="font-display text-2xl md:text-3xl font-bold mb-1">
@@ -189,7 +215,7 @@ const MeetTheLeague = () => {
                         Official Shield Bio
                       </h3>
                       <p className="text-foreground leading-relaxed">
-                        {generateShieldBio(currentGovernor)}
+                        {getContent(currentGovernor.shieldBio, () => generateShieldBio(currentGovernor))}
                       </p>
                     </div>
 
@@ -199,7 +225,7 @@ const MeetTheLeague = () => {
                         Governor's Response to the Shield's Bio
                       </h3>
                       <p className="text-foreground italic leading-relaxed">
-                        {generateGovernorResponse(currentGovernor)}
+                        {getContent(currentGovernor.governorResponse, () => generateGovernorResponse(currentGovernor))}
                       </p>
                     </div>
 
@@ -212,7 +238,9 @@ const MeetTheLeague = () => {
                             Highest High
                           </h3>
                         </div>
-                        <p className="text-foreground">{generateHighestHigh(currentGovernor)}</p>
+                        <p className="text-foreground">
+                          {getContent(currentGovernor.highestHigh, () => generateHighestHigh(currentGovernor))}
+                        </p>
                       </div>
                       <div className="bg-red-500/10 rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-2">
@@ -221,7 +249,9 @@ const MeetTheLeague = () => {
                             Lowest Low
                           </h3>
                         </div>
-                        <p className="text-foreground">{generateLowestLow(currentGovernor)}</p>
+                        <p className="text-foreground">
+                          {getContent(currentGovernor.lowestLow, () => generateLowestLow(currentGovernor))}
+                        </p>
                       </div>
                     </div>
 
