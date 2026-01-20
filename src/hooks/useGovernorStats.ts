@@ -18,16 +18,22 @@ export interface GovernorStats {
   worstFinish: number;
   finalsAppearances: number;
   totalPointsFor: number;
+  // Custom profile fields
+  shieldBio: string | null;
+  governorResponse: string | null;
+  highestHigh: string | null;
+  lowestLow: string | null;
+  profileImageUrl: string | null;
 }
 
 export function useGovernorStats() {
   return useQuery({
     queryKey: ['governor-stats'],
     queryFn: async () => {
-      // Get teams list first
+      // Get teams list first with profile fields
       const { data: teams, error: teamsError } = await supabase
         .from('teams')
-        .select('id, name, owner_name')
+        .select('id, name, owner_name, shield_bio, governor_response, highest_high, lowest_low, profile_image_url')
         .neq('name', 'Bellevue Crackdown');
 
       if (teamsError) throw teamsError;
@@ -49,7 +55,7 @@ export function useGovernorStats() {
       // Aggregate stats by team
       const governorMap = new Map<string, GovernorStats>();
 
-      teams?.forEach((team) => {
+      teams?.forEach((team: any) => {
         governorMap.set(team.id, {
           id: team.id,
           name: team.owner_name || 'Unknown',
@@ -67,6 +73,12 @@ export function useGovernorStats() {
           worstFinish: 1,
           finalsAppearances: 0,
           totalPointsFor: 0,
+          // Custom profile fields
+          shieldBio: team.shield_bio,
+          governorResponse: team.governor_response,
+          highestHigh: team.highest_high,
+          lowestLow: team.lowest_low,
+          profileImageUrl: team.profile_image_url,
         });
       });
 
