@@ -1,11 +1,49 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout/Layout';
-import { coachingHistory, TeamCoachHistory, Coach } from '@/data/leagueData';
+import { useCoachesByTeam, TeamCoachData } from '@/hooks/useCoaches';
+import { Coach } from '@/lib/api/coaches';
 import { ChevronLeft, ChevronRight, Trophy, Target, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const CoachingCarousel = () => {
+  const { data: teamCoaches, isLoading, error } = useCoachesByTeam();
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <section className="py-12 md:py-16">
+          <div className="container mx-auto px-4">
+            <div className="mb-8">
+              <Skeleton className="h-10 w-64 mb-2" />
+              <Skeleton className="h-5 w-96" />
+            </div>
+            <div className="space-y-8">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-48 w-full" />
+              ))}
+            </div>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <section className="py-12 md:py-16">
+          <div className="container mx-auto px-4">
+            <p className="text-destructive">Error loading coaching data</p>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
+
+  const hasCoaches = teamCoaches && teamCoaches.length > 0;
+
   return (
     <Layout>
       <section className="py-12 md:py-16">
@@ -22,18 +60,28 @@ const CoachingCarousel = () => {
             </p>
           </motion.div>
 
-          <div className="space-y-8">
-            {coachingHistory.map((team, index) => (
-              <motion.div
-                key={team.teamName}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.05 * index }}
-              >
-                <TeamCoachCard team={team} />
-              </motion.div>
-            ))}
-          </div>
+          {!hasCoaches ? (
+            <div className="text-center py-12 bg-card border border-border rounded-lg">
+              <User className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No Coaching Data Yet</h3>
+              <p className="text-muted-foreground">
+                Coaching history will appear here once added via the admin panel.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {teamCoaches.map((team, index) => (
+                <motion.div
+                  key={team.teamId}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.05 * index }}
+                >
+                  <TeamCoachCard team={team} />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </Layout>
@@ -41,20 +89,19 @@ const CoachingCarousel = () => {
 };
 
 interface TeamCoachCardProps {
-  team: TeamCoachHistory;
+  team: TeamCoachData;
 }
 
 const TeamCoachCard = ({ team }: TeamCoachCardProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const currentCoach = team.coaches[currentIndex];
   const hasMultipleCoaches = team.coaches.length > 1;
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => Math.min(prev + 1, team.coaches.length - 1));
+    setCurrentIndex((prev) => Math.max(prev - 1, 0));
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => Math.max(prev - 1, 0));
+    setCurrentIndex((prev) => Math.min(prev + 1, team.coaches.length - 1));
   };
 
   return (
@@ -66,17 +113,17 @@ const TeamCoachCard = ({ team }: TeamCoachCardProps) => {
         </h2>
       </div>
 
-      {/* Coach Display */}
+      {/* Carousel Container */}
       <div className="p-6">
-        <div className="flex items-start gap-6">
-          {/* Navigation Arrow - Previous (older) */}
+        <div className="flex items-center gap-4">
+          {/* Previous Arrow */}
           {hasMultipleCoaches && (
             <button
               onClick={goToPrevious}
-              disabled={currentIndex === team.coaches.length - 1}
+              disabled={currentIndex === 0}
               className={cn(
                 'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all',
-                currentIndex === team.coaches.length - 1
+                currentIndex === 0
                   ? 'bg-muted text-muted-foreground cursor-not-allowed'
                   : 'bg-secondary hover:bg-accent hover:text-accent-foreground'
               )}
@@ -86,46 +133,36 @@ const TeamCoachCard = ({ team }: TeamCoachCardProps) => {
             </button>
           )}
 
-          {/* Coach Cards Row */}
-          <div className="flex-1 flex items-center gap-4 overflow-hidden">
-            <AnimatePresence mode="wait">
-              {team.coaches.map((coach, idx) => {
-                const isActive = idx === currentIndex;
-                const isVisible = idx >= currentIndex && idx <= currentIndex + 2;
-
-                if (!isVisible) return null;
-
-                return (
-                  <motion.div
-                    key={coach.name}
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ 
-                      opacity: isActive ? 1 : 0.5,
-                      x: 0,
-                      scale: isActive ? 1 : 0.9,
-                    }}
-                    exit={{ opacity: 0, x: -50 }}
-                    transition={{ duration: 0.3 }}
-                    className={cn(
-                      'flex-shrink-0 transition-all duration-300',
-                      isActive ? 'w-full md:w-2/3' : 'w-24 md:w-32 hidden md:block'
-                    )}
-                  >
-                    <CoachProfile coach={coach} isActive={isActive} />
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+          {/* Coach Cards Container */}
+          <div className="flex-1 overflow-hidden">
+            <div
+              className="flex transition-transform duration-300 ease-in-out gap-4"
+              style={{ transform: `translateX(-${currentIndex * (100 / Math.min(team.coaches.length, 3))}%)` }}
+            >
+              {team.coaches.map((coach, idx) => (
+                <div
+                  key={coach.id}
+                  className={cn(
+                    'flex-shrink-0 transition-opacity duration-300',
+                    team.coaches.length === 1 ? 'w-full' : 
+                    team.coaches.length === 2 ? 'w-[calc(50%-0.5rem)]' : 
+                    'w-[calc(33.333%-0.667rem)]'
+                  )}
+                >
+                  <CoachCard coach={coach} isHighlighted={idx === currentIndex} />
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Navigation Arrow - Next (newer) */}
+          {/* Next Arrow */}
           {hasMultipleCoaches && (
             <button
               onClick={goToNext}
-              disabled={currentIndex === 0}
+              disabled={currentIndex === team.coaches.length - 1}
               className={cn(
                 'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all',
-                currentIndex === 0
+                currentIndex === team.coaches.length - 1
                   ? 'bg-muted text-muted-foreground cursor-not-allowed'
                   : 'bg-secondary hover:bg-accent hover:text-accent-foreground'
               )}
@@ -136,7 +173,7 @@ const TeamCoachCard = ({ team }: TeamCoachCardProps) => {
           )}
         </div>
 
-        {/* Timeline Indicator */}
+        {/* Dots Indicator */}
         {hasMultipleCoaches && (
           <div className="mt-4 flex items-center justify-center gap-2">
             {team.coaches.map((_, idx) => (
@@ -159,96 +196,116 @@ const TeamCoachCard = ({ team }: TeamCoachCardProps) => {
   );
 };
 
-interface CoachProfileProps {
+interface CoachCardProps {
   coach: Coach;
-  isActive: boolean;
+  isHighlighted: boolean;
 }
 
-const CoachProfile = ({ coach, isActive }: CoachProfileProps) => {
-  if (!isActive) {
-    // Compact view for non-active coaches
-    return (
-      <div className="text-center">
-        <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-2 opacity-50">
-          <User size={24} className="text-muted-foreground" />
-        </div>
-        <p className="text-xs text-muted-foreground truncate">{coach.name}</p>
-      </div>
-    );
-  }
-
-  // Full view for active coach
+const CoachCard = ({ coach, isHighlighted }: CoachCardProps) => {
   const totalGames = coach.wins + coach.losses;
   const winPct = totalGames > 0 ? ((coach.wins / totalGames) * 100).toFixed(1) : '0.0';
-  const playoffGames = coach.playoffWins + coach.playoffLosses;
-  const playoffWinPct = playoffGames > 0 ? ((coach.playoffWins / playoffGames) * 100).toFixed(1) : '-';
+  const playoffGames = coach.playoff_wins + coach.playoff_losses;
+  const playoffWinPct = playoffGames > 0 ? ((coach.playoff_wins / playoffGames) * 100).toFixed(1) : '-';
+
+  const getTenureDisplay = () => {
+    if (coach.is_current) {
+      return `${coach.tenure_start}-Present`;
+    }
+    return `${coach.tenure_start}-${coach.tenure_end || '?'}`;
+  };
 
   return (
-    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-      {/* Headshot */}
-      <div className={cn(
-        'flex-shrink-0 w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 flex items-center justify-center',
-        coach.isCurrent ? 'border-accent' : 'border-muted'
-      )}>
-        <User size={48} className={coach.isCurrent ? 'text-accent' : 'text-muted-foreground'} />
-      </div>
-
-      {/* Coach Info */}
-      <div className="flex-1 text-center md:text-left">
-        <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
-          <h3 className="font-display text-2xl font-bold">{coach.name}</h3>
-          {coach.isCurrent && (
-            <span className="inline-block px-2 py-0.5 bg-accent text-accent-foreground text-xs font-display font-semibold uppercase tracking-wider rounded">
-              Current
-            </span>
+    <div
+      className={cn(
+        'bg-secondary/50 rounded-lg p-4 border transition-all',
+        isHighlighted ? 'border-accent shadow-lg' : 'border-transparent'
+      )}
+    >
+      {/* Photo and Name */}
+      <div className="flex items-center gap-4 mb-3">
+        <div
+          className={cn(
+            'flex-shrink-0 w-16 h-16 rounded-full overflow-hidden border-2',
+            coach.is_current ? 'border-accent' : 'border-muted'
+          )}
+        >
+          {coach.photo_url ? (
+            <img
+              src={coach.photo_url}
+              alt={coach.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-muted flex items-center justify-center">
+              <User size={24} className="text-muted-foreground" />
+            </div>
           )}
         </div>
-        <p className="text-muted-foreground mb-4">{coach.yearsActive}</p>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-secondary/50 rounded-lg p-3 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Record</p>
-            <p className="font-mono font-bold">
-              <span className="text-win">{coach.wins}</span>
-              <span className="text-muted-foreground">-</span>
-              <span className="text-loss">{coach.losses}</span>
-            </p>
-            <p className="text-xs text-muted-foreground">{winPct}%</p>
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="font-display text-lg font-bold">{coach.name}</h3>
+            {coach.is_current && (
+              <span className="px-2 py-0.5 bg-accent text-accent-foreground text-xs font-display font-semibold uppercase tracking-wider rounded">
+                Current
+              </span>
+            )}
           </div>
+          <p className="text-sm text-muted-foreground">{getTenureDisplay()}</p>
+        </div>
+      </div>
 
-          <div className="bg-secondary/50 rounded-lg p-3 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Playoff</p>
-            <p className="font-mono font-bold">
-              <span className="text-win">{coach.playoffWins}</span>
-              <span className="text-muted-foreground">-</span>
-              <span className="text-loss">{coach.playoffLosses}</span>
-            </p>
-            <p className="text-xs text-muted-foreground">{playoffWinPct}%</p>
+      {/* Tenure Summary */}
+      {coach.tenure_summary && (
+        <p className="text-sm text-muted-foreground italic mb-3 line-clamp-2">
+          "{coach.tenure_summary}"
+        </p>
+      )}
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="bg-background/50 rounded p-2 text-center">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-0.5">W-L</p>
+          <p className="font-mono text-sm font-bold">
+            <span className="text-win">{coach.wins}</span>
+            <span className="text-muted-foreground">-</span>
+            <span className="text-loss">{coach.losses}</span>
+          </p>
+          <p className="text-xs text-muted-foreground">{winPct}%</p>
+        </div>
+
+        <div className="bg-background/50 rounded p-2 text-center">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-0.5">Playoff</p>
+          <p className="font-mono text-sm font-bold">
+            <span className="text-win">{coach.playoff_wins}</span>
+            <span className="text-muted-foreground">-</span>
+            <span className="text-loss">{coach.playoff_losses}</span>
+          </p>
+          <p className="text-xs text-muted-foreground">{playoffWinPct}%</p>
+        </div>
+
+        <div className="bg-background/50 rounded p-2 text-center">
+          <div className="flex items-center justify-center gap-1 mb-0.5">
+            <Trophy size={10} className="text-gold" />
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Titles</p>
           </div>
-
-          <div className="bg-secondary/50 rounded-lg p-3 text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <Trophy size={12} className="text-gold" />
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Titles</p>
-            </div>
-            <p className={cn(
-              'font-mono text-2xl font-bold',
+          <p
+            className={cn(
+              'font-mono text-xl font-bold',
               coach.championships > 0 ? 'text-gold' : 'text-muted-foreground'
-            )}>
-              {coach.championships}
-            </p>
-          </div>
+            )}
+          >
+            {coach.championships}
+          </p>
+        </div>
 
-          <div className="bg-secondary/50 rounded-lg p-3 text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <Target size={12} className="text-accent" />
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Playoffs</p>
-            </div>
-            <p className="font-mono text-2xl font-bold text-accent">
-              {coach.playoffWins + coach.playoffLosses > 0 ? '✓' : '-'}
-            </p>
+        <div className="bg-background/50 rounded p-2 text-center">
+          <div className="flex items-center justify-center gap-1 mb-0.5">
+            <Target size={10} className="text-accent" />
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Playoffs</p>
           </div>
+          <p className="font-mono text-xl font-bold text-accent">
+            {coach.playoff_wins + coach.playoff_losses > 0 ? '✓' : '-'}
+          </p>
         </div>
       </div>
     </div>

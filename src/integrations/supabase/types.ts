@@ -65,6 +65,71 @@ export type Database = {
         }
         Relationships: []
       }
+      coaches: {
+        Row: {
+          championships: number
+          created_at: string
+          display_order: number
+          id: string
+          is_current: boolean
+          losses: number
+          name: string
+          photo_url: string | null
+          playoff_losses: number
+          playoff_wins: number
+          team_id: string | null
+          tenure_end: number | null
+          tenure_start: number
+          tenure_summary: string | null
+          updated_at: string
+          wins: number
+        }
+        Insert: {
+          championships?: number
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_current?: boolean
+          losses?: number
+          name: string
+          photo_url?: string | null
+          playoff_losses?: number
+          playoff_wins?: number
+          team_id?: string | null
+          tenure_end?: number | null
+          tenure_start: number
+          tenure_summary?: string | null
+          updated_at?: string
+          wins?: number
+        }
+        Update: {
+          championships?: number
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_current?: boolean
+          losses?: number
+          name?: string
+          photo_url?: string | null
+          playoff_losses?: number
+          playoff_wins?: number
+          team_id?: string | null
+          tenure_end?: number | null
+          tenure_start?: number
+          tenure_summary?: string | null
+          updated_at?: string
+          wins?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaches_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       draft_picks: {
         Row: {
           created_at: string
