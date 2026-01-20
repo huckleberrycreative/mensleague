@@ -19,11 +19,11 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If the user is already authenticated, don't let them get stuck on /admin/login
-    if (!authLoading && user) {
+    // If the user is authenticated, don't let them get stuck on /admin/login
+    if (user) {
       navigate('/admin/dashboard', { replace: true });
     }
-  }, [authLoading, user, navigate]);
+  }, [user, navigate]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
