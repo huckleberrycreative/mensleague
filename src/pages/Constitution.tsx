@@ -94,6 +94,128 @@ const amendments: Amendment[] = [
   },
 ];
 
+// Amendment data - styled as sticky notes
+const constitutionalAmendments = [
+  {
+    number: '1st',
+    title: 'The Practice Squad',
+    color: 'bg-yellow-200',
+    rotation: '-rotate-2',
+    content: [
+      'Each team has a practice squad consisting of (3) spots. Rookies on a team\'s practice squad do not count toward a Governor\'s cap until they are activated into their lineup.',
+      'Governors can keep rookies on their practice squad for 2 FULL SEASONS before they have to release them or activate them into their actual roster.',
+      'Beginning in Week 3 of the season, opposing teams can sign players off of anyone\'s practice squad for 1.5x their rookie pay scale. This will be treated as RFA. Owners can choose to match + activate their rookie.',
+    ],
+  },
+  {
+    number: '2nd',
+    title: 'Last Place Penalty',
+    color: 'bg-pink-200',
+    rotation: 'rotate-1',
+    content: [
+      'The Governor who finishes in 10th place every season must affix eye-lashes to their car\'s headlights for the time period between the day after the Championship concludes to the Rookie Draft.',
+      'Governors are also automatically relegated from the league for a period of one year, UNLESS they agree to pay 2x the league dues the following year. Repeat offenders must pay 2x their previous year\'s dues.',
+    ],
+  },
+  {
+    number: '3rd',
+    title: 'Rivalry Week',
+    color: 'bg-blue-200',
+    rotation: '-rotate-1',
+    content: [
+      'The last week of the NFL season prior to byes starting, the league will play a RIVALRY WEEK, in which we abandon our traditional scoring system, and revert back to a single H2H matchup against your bitter rival.',
+      'The winner of each Rivalry Week matchup will be awarded 15 points, and the loser of each Rivalry Week matchup will be awarded 0 points (and like it).',
+    ],
+  },
+  {
+    number: '4th',
+    title: 'Location Naming Conventions',
+    color: 'bg-green-200',
+    rotation: 'rotate-2',
+    content: [
+      'Governors must pick a permanent location for the first half of their team names.',
+      'Governors may apply for relocation under two circumstances: (1) They physically move. (2) They submit a proposal to the league and receive a 7/10 supermajority vote of approval.',
+      'While mascot names can be (2) words, location names must remain (2) words or less.',
+    ],
+  },
+  {
+    number: '5th',
+    title: 'The "Team Captain"',
+    color: 'bg-orange-200',
+    rotation: '-rotate-2',
+    content: [
+      'As a means of maximizing Governor strategy, each week during the regular season, Governors will nominate a non-QB "Team Captain," whose points will be given a 1.25x multiplier at the end of the week.',
+      'A player can only be team captain twice in the same season.',
+    ],
+  },
+  {
+    number: '6th',
+    title: 'The Jailbird Penalty',
+    color: 'bg-purple-200',
+    rotation: 'rotate-1',
+    content: [
+      'Governors must pay a $10 fine to the League Offices every time a player on their active roster is arrested. For enforcement purposes, the league considers a player arrested if they have a mugshot.',
+      'All jailbird money is applied to operational costs related to the Rookie & Fall drafts.',
+    ],
+  },
+  {
+    number: '7th',
+    title: 'Adjustment to League Dues',
+    color: 'bg-amber-200',
+    rotation: '-rotate-1',
+    content: [
+      'Starting in 2025, league dues will increase by an inflation-adjusted $25 per season:',
+      '2025: $125 | 2026: $150 | Etc.',
+    ],
+  },
+  {
+    number: '8th',
+    title: 'The Pro Bowl',
+    color: 'bg-cyan-200',
+    rotation: 'rotate-2',
+    content: [
+      'Starting with the 2024 season, Week 18 will now become the Men\'s League Pro Bowl. From the pool of active Week 18 players, our Governors will use Mensleague.com to collectively vote for that season\'s Pro Bowlers: 2 players from each roster that were the MOST VALUABLE asset.',
+      'The Pro Bowl is Nashville vs. The World format: Nashville (Jackson, Ben, William, Johnny, Aicklen) vs. The World (James, Dino, Blake, Hobart, Carlos).',
+      'NOTE: Carlos was selected for Team World to make it an even 5-5 split. We made this decision because he lives in Franklin, and because he serves in our Armed Forces, so is the most well-traveled of any Governor.',
+      'The losing team will contribute the money for the rookie and fall draft drinks & food.',
+    ],
+  },
+  {
+    number: '9th',
+    title: 'MFL HONORS',
+    color: 'bg-rose-200',
+    rotation: '-rotate-2',
+    content: [
+      'Starting in 2024, MFL Honors will take place at that nice, weird back room behind the velvet curtain at Sports & Social at the Green Hills Mall.',
+      'This will be a chance for us to watch the Men\'s League Pro Bowl together, and officially hand out various awards TBD. Winners will be selected by anonymous league vote on mensleague.com.',
+    ],
+  },
+  {
+    number: '10th',
+    title: 'Discord Channel',
+    color: 'bg-lime-200',
+    rotation: 'rotate-1',
+    content: [
+      'Starting in 2024, to prevent a spamming of Governors\' phones, and to promote a false sense of democracy, the NFLPA will be in charge of creating and managing a Discord channel for league conversations.',
+      'This channel will consist of (3) separate threads: #GuysBeingDudes (just general banter), #FromtheDeskoftheCommish (important league announcements), #Transactions (trade announcements).',
+    ],
+  },
+];
+
+// Signature styles for each governor - unique variations
+const governorSignatures = [
+  { name: 'Ben Holcomb', size: 'text-3xl', slant: 'skew-x-3', weight: 'font-normal' },
+  { name: 'Dino Nicandros', size: 'text-2xl', slant: '-skew-x-2', weight: 'font-normal' },
+  { name: 'Jackson Ferrell', size: 'text-4xl', slant: 'skew-x-6', weight: 'font-normal' },
+  { name: 'Bill Holcomb', size: 'text-2xl', slant: 'skew-x-0', weight: 'font-normal' },
+  { name: 'Johnny Holcomb', size: 'text-3xl', slant: '-skew-x-6', weight: 'font-normal' },
+  { name: 'James Holcomb', size: 'text-2xl', slant: 'skew-x-2', weight: 'font-normal' },
+  { name: 'Carlos Evans', size: 'text-4xl', slant: '-skew-x-3', weight: 'font-normal' },
+  { name: 'Blake Blacklidge', size: 'text-2xl', slant: 'skew-x-1', weight: 'font-normal' },
+  { name: 'Will Hobart', size: 'text-3xl', slant: '-skew-x-1', weight: 'font-normal' },
+  { name: 'John Aicklen', size: 'text-2xl', slant: 'skew-x-4', weight: 'font-normal' },
+];
+
 // Ornate decorative flourish SVG component
 const Flourish = ({ className = '' }: { className?: string }) => (
   <svg className={className} viewBox="0 0 200 30" fill="currentColor">
@@ -115,6 +237,16 @@ const CornerOrnament = ({ className = '' }: { className?: string }) => (
     <circle cx="30" cy="30" r="3" />
     <circle cx="15" cy="45" r="2" opacity="0.7" />
     <circle cx="45" cy="15" r="2" opacity="0.7" />
+  </svg>
+);
+
+// Thumbtack SVG component
+const Thumbtack = ({ className = '' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <ellipse cx="12" cy="6" rx="6" ry="4" fill="#b91c1c" />
+    <ellipse cx="12" cy="5" rx="4" ry="2.5" fill="#dc2626" />
+    <rect x="11" y="8" width="2" height="10" fill="#6b7280" />
+    <polygon points="10,18 14,18 12,24" fill="#4b5563" />
   </svg>
 );
 
@@ -318,29 +450,18 @@ const Constitution = () => {
                         </p>
 
                         {/* Signature area */}
-                        <div className="mt-12 grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-10">
-                          {[
-                            'Ben Holcomb',
-                            'Dino Nicandros',
-                            'Jackson Ferrell',
-                            'Bill Holcomb',
-                            'Johnny Holcomb',
-                            'James Holcomb',
-                            'Carlos Evans',
-                            'Blake Blacklidge',
-                            'Will Hobart',
-                            'John Aicklen',
-                          ].map((governor, i) => (
+                        <div className="mt-12 grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-10">
+                          {governorSignatures.map((gov, i) => (
                             <div key={i} className="text-center">
                               <p 
-                                className="text-2xl md:text-3xl text-neutral-800 mb-1"
+                                className={`${gov.size} ${gov.slant} ${gov.weight} text-neutral-800 mb-1 transform`}
                                 style={{ 
                                   fontFamily: '"Pinyon Script", cursive',
                                 }}
                               >
-                                {governor}
+                                {gov.name}
                               </p>
-                              <div className="w-28 h-px bg-neutral-400 mx-auto" />
+                              <div className="w-24 h-px bg-neutral-400 mx-auto" />
                             </div>
                           ))}
                         </div>
@@ -358,6 +479,64 @@ const Constitution = () => {
                         </div>
 
                         <Flourish className="w-32 h-6 mx-auto mt-8 text-neutral-400 rotate-180" />
+                      </div>
+                    </div>
+
+                    {/* AMENDMENTS SECTION - Sticky Notes */}
+                    <div className="mt-24 pt-12 border-t-4 border-dashed border-neutral-400">
+                      <div className="text-center mb-12">
+                        <h2 className="font-oldEnglish text-3xl md:text-4xl text-black tracking-wide mb-2">
+                          Amendments
+                        </h2>
+                        <p className="font-serif text-neutral-500 italic text-sm">
+                          (hastily tacked on by subsequent Governors)
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {constitutionalAmendments.map((amendment, index) => (
+                          <motion.div
+                            key={amendment.number}
+                            initial={{ opacity: 0, y: 20, rotate: 0 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.4, delay: index * 0.1 }}
+                            className={`relative ${amendment.rotation} transform hover:rotate-0 transition-transform duration-300`}
+                          >
+                            {/* Thumbtack */}
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                              <Thumbtack className="w-6 h-8 drop-shadow-md" />
+                            </div>
+                            
+                            {/* Sticky Note */}
+                            <div 
+                              className={`${amendment.color} p-6 pt-8 shadow-lg relative`}
+                              style={{
+                                boxShadow: '2px 4px 8px rgba(0,0,0,0.2), inset 0 0 40px rgba(255,255,255,0.3)',
+                              }}
+                            >
+                              {/* Folded corner effect */}
+                              <div 
+                                className="absolute bottom-0 right-0 w-8 h-8"
+                                style={{
+                                  background: 'linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50%)',
+                                }}
+                              />
+                              
+                              <h3 className="font-display text-lg font-bold text-neutral-800 mb-3">
+                                {amendment.number} Amendment: {amendment.title}
+                              </h3>
+                              
+                              <div className="space-y-2">
+                                {amendment.content.map((paragraph, pIndex) => (
+                                  <p key={pIndex} className="text-sm text-neutral-700 leading-relaxed">
+                                    {paragraph}
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
                       </div>
                     </div>
                   </div>
