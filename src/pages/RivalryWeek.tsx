@@ -315,23 +315,31 @@ const RivalryWeek = () => {
                     </div>
 
                     {/* Trophy Section */}
-                    {currentRivalry.trophy_name && (
-                      <div className="bg-gold/10 rounded-lg p-4 border border-gold/30 text-center">
-                        <Trophy className="mx-auto mb-2 text-gold" size={32} />
-                        <p className="font-display font-bold text-lg">{currentRivalry.trophy_name}</p>
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                          {(record.team1Wins >= record.team2Wins ? currentRivalry.team1_name : currentRivalry.team2_name) && (
-                            <TeamLogo 
-                              teamName={(record.team1Wins >= record.team2Wins ? currentRivalry.team1_name : currentRivalry.team2_name)!} 
-                              size="md" 
-                            />
-                          )}
-                          <p className="text-sm text-muted-foreground">
-                            Current Holder: {record.team1Wins >= record.team2Wins ? getTeam1Display(currentRivalry) : getTeam2Display(currentRivalry)}
-                          </p>
+                    {currentRivalry.trophy_name && (() => {
+                      // Current holder is based on the most recent matchup winner
+                      const mostRecentMatchup = currentRivalry.matchups[0]; // Already sorted by season DESC
+                      const currentHolderIsTeam1 = mostRecentMatchup?.winner === 'team1';
+                      const currentHolderName = currentHolderIsTeam1 ? getTeam1Display(currentRivalry) : getTeam2Display(currentRivalry);
+                      const currentHolderLogoName = currentHolderIsTeam1 ? currentRivalry.team1_name : currentRivalry.team2_name;
+                      
+                      return (
+                        <div className="bg-gold/10 rounded-lg p-4 border border-gold/30 text-center">
+                          <Trophy className="mx-auto mb-2 text-gold" size={32} />
+                          <p className="font-display font-bold text-lg">{currentRivalry.trophy_name}</p>
+                          <div className="flex items-center justify-center gap-2 mt-2">
+                            {currentHolderLogoName && (
+                              <TeamLogo 
+                                teamName={currentHolderLogoName} 
+                                size="md" 
+                              />
+                            )}
+                            <p className="text-sm text-muted-foreground">
+                              Current Holder: {currentHolderName}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      );
+                    })()}
                   </div>
                 </motion.div>
               </AnimatePresence>
