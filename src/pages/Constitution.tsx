@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Layout } from '@/components/layout/Layout';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import '@fontsource/pinyon-script';
 
 interface Amendment {
   id: string;
@@ -317,31 +318,29 @@ const Constitution = () => {
                         </p>
 
                         {/* Signature area */}
-                        <div className="mt-12 grid grid-cols-2 md:grid-cols-5 gap-8">
+                        <div className="mt-12 grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-10">
                           {[
-                            { name: 'Ben Holcomb', style: 'italic tracking-wide', script: 'Ben Holcomb' },
-                            { name: 'Dino Nicandros', style: 'tracking-widest font-light', script: 'Dino Nicandros' },
-                            { name: 'Connor Miller', style: 'italic font-bold tracking-tight', script: 'Connor Miller' },
-                            { name: 'Pierce Reynolds', style: 'tracking-wide font-medium', script: 'Pierce Reynolds' },
-                            { name: 'Cameron Lee', style: 'italic font-light tracking-wider', script: 'Cameron Lee' },
-                            { name: 'Peter Fazio', style: 'font-bold tracking-normal', script: 'Peter Fazio' },
-                            { name: 'Dan Hare', style: 'italic tracking-widest font-medium', script: 'Dan Hare' },
-                            { name: 'Bryce Fisher', style: 'tracking-tight italic', script: 'Bryce Fisher' },
-                            { name: 'Colin Brophy', style: 'font-medium tracking-wide', script: 'Colin Brophy' },
-                            { name: 'Wynn Wygal', style: 'italic font-bold tracking-wider', script: 'Wynn Wygal' },
+                            'Ben Holcomb',
+                            'Dino Nicandros',
+                            'Jackson Ferrell',
+                            'Bill Holcomb',
+                            'Johnny Holcomb',
+                            'James Holcomb',
+                            'Carlos Evans',
+                            'Blake Blacklidge',
+                            'Will Hobart',
+                            'John Aicklen',
                           ].map((governor, i) => (
-                            <div key={i} className="text-center group">
+                            <div key={i} className="text-center">
                               <p 
-                                className={`font-serif text-lg md:text-xl text-neutral-700 mb-1 transform -rotate-2 ${governor.style}`}
+                                className="text-2xl md:text-3xl text-neutral-800 mb-1"
                                 style={{ 
-                                  fontFamily: 'Georgia, serif',
-                                  textShadow: '0.5px 0.5px 0px rgba(0,0,0,0.1)'
+                                  fontFamily: '"Pinyon Script", cursive',
                                 }}
                               >
-                                {governor.script}
+                                {governor}
                               </p>
-                              <div className="w-24 h-px bg-neutral-400 mx-auto mb-1" />
-                              <p className="font-serif text-xs text-neutral-500">{governor.name}</p>
+                              <div className="w-28 h-px bg-neutral-400 mx-auto" />
                             </div>
                           ))}
                         </div>
